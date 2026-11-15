@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         PYTHON = 'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python311\\python.exe'
+        DOCKER = 'C:\\Users\\Admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
     }
 
     stages {
@@ -30,7 +31,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t medibot:jenkins .'
+                bat '"%DOCKER%" --version'
+                bat '"%DOCKER%" build -t medibot:jenkins .'
             }
         }
     }
