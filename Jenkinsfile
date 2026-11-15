@@ -16,7 +16,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat '"%PYTHON%" --version'
+                bat '"%PYTHON%" -m pip install --upgrade pip'
                 bat '"%PYTHON%" -m pip install -r requirements.txt'
+                bat '"%PYTHON%" -m pip install pytest'
             }
         }
 
