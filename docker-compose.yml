@@ -1,0 +1,23 @@
+services:
+  medibot:
+    build: .
+    image: medibot:latest
+    container_name: medibot
+    ports:
+      - "8000:8000"
+    # API keys come from your local .env file (never baked into the image)
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8000"
+    # Volume mount: edit HTML/CSS/JS on your laptop and just refresh the browser
+    volumes:
+      - ./app/static:/app/app/static:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

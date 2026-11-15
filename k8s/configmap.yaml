@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medibot-config
+data:
+  MODEL_PROVIDER: "groq"
+  GROQ_MODEL: "openai/gpt-oss-120b"
+  REQUEST_TIMEOUT: "90"
+  HOST: "0.0.0.0"
+  PORT: "8000"

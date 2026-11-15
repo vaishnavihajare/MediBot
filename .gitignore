@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.tar
+
+.env
+.venv/
+__pycache__/
+*.pyc
+
+k8s/secret.yaml
+
+k8s/secret.yaml

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBot — Multi-Agent Healthcare Assistant</title>
+  <meta name="description" content="Three AI agents analyse, research and review your health question.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <svg class="brand-mark" width="34" height="34" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 4h10v7h7v10h-7v7H11v-7H4V11h7z"/>
+        </svg>
+        <div>
+          <div class="brand-name">MediBot</div>
+          <div class="brand-sub">Health information, checked by three agents</div>
+        </div>
+      </div>
+      <div class="masthead-right">
+        <div class="status" id="systemStatus">
+          <span class="status-dot"></span>
+          <span id="statusLabel">Checking backend…</span>
+        </div>
+        <span class="model-tag" id="modelTag">Agno + AI model</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="notice">
+    <p><strong>Educational use only.</strong> MediBot shares general health information. It is not a doctor and cannot diagnose or prescribe. In an emergency call 112.</p>
+  </div>
+
+  <main class="workspace">
+
+    <!-- LEFT: the question and the three-agent docket -->
+    <section class="docket" aria-label="Ask a question">
+      <h1 class="page-title">What do you need to know?</h1>
+      <p class="page-lede">Describe your situation in plain words. Three agents will work through it in turn.</p>
+
+      <form id="healthForm">
+        <label for="questionInput" class="field-label">Your question</label>
+        <div class="pad">
+          <textarea
+            id="questionInput"
+            rows="7"
+            maxlength="2000"
+            placeholder="For example: I have had a fever and sore throat for two days. What can I do at home, and when should I see a doctor?"
+            required
+          ></textarea>
+          <div class="pad-foot">
+            <span>More detail gives better citations.</span>
+            <span><span id="charCount">0</span> / 2000</span>
+          </div>
+        </div>
+
+        <div class="topics">
+          <div class="topics-label">Try one of these</div>
+          <div class="topics-list">
+            <button type="button" class="suggestion-chip" data-query="I have had a fever and sore throat for two days. What can I do at home and when should I see a doctor?">Fever & sore throat</button>
+            <button type="button" class="suggestion-chip" data-query="What blood pressure reading is considered high and how can I lower it with lifestyle changes?">High blood pressure</button>
+            <button type="button" class="suggestion-chip" data-query="What are the early symptoms of type 2 diabetes and what is a normal fasting blood sugar?">Diabetes symptoms</button>
+            <button type="button" class="suggestion-chip" data-query="Is it safe to take paracetamol and ibuprofen together, and what is the maximum daily dose of paracetamol for an adult?">Paracetamol safety</button>
+            <button type="button" class="suggestion-chip" data-query="What are the warning signs of dengue and which painkillers should I avoid for the fever?">Dengue warning signs</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="clearBtn" class="btn btn-quiet">Clear</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary">Get health summary</button>
+        </div>
+      </form>
+
+      <div class="stages">
+        <h2 class="stages-title">How it works</h2>
+        <ol class="stage-list">
+          <li class="pipeline-step" id="pipe1">
+            <span class="stage-no">1</span>
+            <div>
+              <div class="stage-name">Query Analyzer</div>
+              <div class="stage-desc">Sorts your question into a health topic and pulls out the key details.</div>
+            </div>
+          </li>
+          <li class="pipeline-step" id="pipe2">
+            <span class="stage-no">2</span>
+            <div>
+              <div class="stage-name">Research Agent</div>
+              <div class="stage-desc">Searches the built-in health library for guidelines and safe-use information.</div>
+            </div>
+          </li>
+          <li class="pipeline-step" id="pipe3">
+            <span class="stage-no">3</span>
+            <div>
+              <div class="stage-name">Answer Reviewer</div>
+              <div class="stage-desc">Checks every claim against the research, removes anything unsupported, and adds safety advice.</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- RIGHT: the memorandum -->
+    <section class="memo-column" aria-live="polite" aria-label="Health summary">
+      <div class="sheet">
+
+        <div class="sheet-tools">
+          <button type="button" id="copyBtn" class="btn btn-small" style="display:none;" title="Copy to clipboard">
+            <span>Copy</span>
+          </button>
+          <button type="button" id="printBtn" class="btn btn-small" style="display:none;" title="Print or save as PDF">
+            <span>Print / PDF</span>
+          </button>
+        </div>
+
+        <div id="emptyView" class="state empty-view">
+          <svg width="56" height="56" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 4h10v7h7v10h-7v7H11v-7H4V11h7z"/>
+          </svg>
+          <h2>Your health summary will appear here</h2>
+          <p>Type a question or pick an example, then choose <em>Get health summary</em>.</p>
+        </div>
+
+        <div id="loadingView" class="state loading-view" style="display:none;">
+          <div class="spinner"></div>
+          <div class="loading-label" id="loadingLabel">Agents at work…</div>
+          <div class="loading-caption" id="loadingCaption">This usually takes 10–30 seconds.</div>
+        </div>
+
+        <div id="errorView" class="error-banner" style="display:none;" role="alert">
+          <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+        <div id="responseView" class="response-view" style="display:none;">
+          <header class="memo-head">
+            <div>
+              <h2 class="memo-title">Health Information Summary</h2>
+              <div class="memo-date" id="memoTimestamp">Reviewed findings</div>
+            </div>
+            <div class="seal" aria-label="Reviewed by the Answer Reviewer">
+              <span>Reviewed</span>
+            </div>
+          </header>
+
+          <div id="sourcesBlock" class="sources" style="display:none;">
+            <div class="sources-title">Sources consulted</div>
+            <div id="sourcesTags" class="sources-tags"></div>
+          </div>
+
+          <article id="answerArticle" class="answer-article"></article>
+
+          <footer class="memo-foot">
+            <p id="disclaimerNotice" class="disclaimer-copy"></p>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-foot">
+    MediBot · built with FastAPI, Agno and a hosted LLM · GenAI &amp; ML DevOps lab project
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
